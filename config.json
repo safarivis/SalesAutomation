@@ -1,0 +1,11 @@
+{
+    "gmail_user": "strijderai@gmail.com",
+    "gmail_app_password": "awvg tway ybbv bfeu",
+    "gemini_api_key": "AIzaSyBnfQTy8HGQ07WvStqIByteHtabD9kpC2w",
+    "database_path": "sales_automation.db",
+    "email_settings": {
+        "daily_limit": 50,
+        "retry_interval": 300,
+        "check_interval": 3600
+    }
+}

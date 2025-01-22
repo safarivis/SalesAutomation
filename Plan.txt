@@ -1,0 +1,35 @@
+[SYSTEM CONTEXT FOR CLAUDE]
+Project: AI Sales Agent for Permission-Based Outreach
+
+GOALS:
+1. Send Seth Godin-style emails via Gmail (story-driven, empathetic).
+2. Auto-reply to responses using Claude 3.5.
+3. Track interactions in SQLite DB.
+4. Full automation (cron jobs, no manual work).
+
+TECH STACK:
+- Language: Python 3.10+
+- Email: Gmail SMTP/IMAP (app passwords)
+- Database: SQLite (local file)
+- LLM: Claude 3.5 Sonnet (via Windsurf)
+- Host: Linux Arch (cron for scheduling)
+
+KEY REQUIREMENTS:
+- Seth Godin Philosophy:
+  - No spam: Include easy opt-out ("reply STOP").
+  - Story-driven: Start emails with observations, not pitches.
+  - Generosity: Offer free resources (e.g., case studies).
+- Database Schema:
+  - Tables: contacts, interactions, unsubscribes
+  - Fields: email, name, industry, last_contacted, email_history
+- Automation:
+  - Send initial emails to leads.
+  - Check inbox hourly for replies.
+  - Auto-respond to inquiries/STOP requests.
+
+YOUR TASK:
+Write a Python script that:
+1. Connects to Gmail via SMTP/IMAP.
+2. Manages contacts/interactions in SQLite.
+3. Uses Claude 3.5 to generate/reply to emails.
+4. Avoids spam folders (DKIM/SPF best practices).

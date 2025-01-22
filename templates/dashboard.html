@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Automation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .metric-card {
+            border-left: 4px solid #0d6efd;
+        }
+        .stage-badge {
+            font-size: 0.8em;
+            padding: 0.4em 0.8em;
+        }
+        .prospect-row:hover {
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-active { background-color: #198754; }
+        .status-pending { background-color: #ffc107; }
+        .status-inactive { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-graph-up"></i> Sales Automation
+            </a>
+            <div class="d-flex">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-clock"></i> Last Updated: <span id="lastUpdate"></span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <!-- Metrics Cards -->
+            <div class="col-md-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Total Prospects</h6>
+                        <h2 class="card-title" id="totalProspects">-</h2>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Response Rate</h6>
+                        <h2 class="card-title" id="responseRate">-</h2>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-success" id="responseRateBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Demo Scheduled</h6>
+                        <h2 class="card-title" id="demoScheduled">-</h2>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-info" id="demoScheduledBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card h-100">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-2 text-muted">Conversion Rate</h6>
+                        <h2 class="card-title" id="conversionRate">-</h2>
+                        <div class="progress" style="height: 4px;">
+                            <div class="progress-bar bg-warning" id="conversionRateBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <!-- Stage Distribution Chart -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Stage Distribution</h5>
+                        <canvas id="stageChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Recent Activity -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Activity</h5>
+                        <div id="recentActivity" class="list-group list-group-flush">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Prospect Table -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title">Prospects</h5>
+                            <div class="input-group w-auto">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search prospects...">
+                                <button class="btn btn-outline-secondary" type="button" onclick="searchProspects()">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Stage</th>
+                                        <th>Last Updated</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="prospectsTable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Prospect Details -->
+    <div class="modal fade" id="prospectModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Prospect Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="prospectDetails">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
